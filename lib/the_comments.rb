@@ -11,10 +11,12 @@ _root_ = File.expand_path('../../',  __FILE__)
 
 module TheComments
   class Engine < Rails::Engine; end
+  COMMENTS_COOKIES_TOKEN = 'JustTheCommentsCookies'
 end
 
 # Loading of concerns
 require "#{_root_}/config/routes.rb"
+require "#{_root_}/app/controllers/concerns/view_token.rb"
 require "#{_root_}/app/controllers/concerns/controller.rb"
 
 %w[ comment_states comment user commentable ].each do |concern|

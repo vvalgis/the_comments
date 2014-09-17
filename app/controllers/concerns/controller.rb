@@ -1,52 +1,34 @@
 module TheComments
-  COMMENTS_COOKIES_TOKEN = 'JustTheCommentsCookies'
-
-  # Cookies and View token for spam protection
-  # include TheComments::ViewToken
-  module ViewToken
-    extend ActiveSupport::Concern
-
-    included { before_action :set_the_comments_cookies }
-
-    def comments_view_token
-      cookies[:comments_view_token]
-    end
-
-    private
-
-    def set_the_comments_cookies
-      cookies[:the_comment_cookies] = { value: TheComments::COMMENTS_COOKIES_TOKEN, expires: 1.year.from_now }
-      cookies[:comments_view_token] = { value: SecureRandom.hex, expires: 7.days.from_now } unless cookies[:comments_view_token]
-    end
-  end
-
   # Base functionality of Comments Controller
   # class CommentsController < ApplicationController
   #   include TheComments::Controller
   # end
   module Controller
-    extend ActiveSupport::Concern
+    # extend ActiveSupport::Concern
 
-    included do
-      include TheComments::ViewToken
+    def self.included(base)
+      # include TheComments::ViewToken
+      base.class_eval do
 
-      # Attention! We should not set TheComments cookie before create
-      skip_before_action :set_the_comments_cookies, only: [:create]
+        # Attention! We should not set TheComments cookie before create
+        skip_before_action :set_the_comments_cookies, only: [:create]
 
-      # Spam protection
-      before_action -> { @errors = [] }, only: [:create]
+        # Spam protection
+        before_action -> { @errors = [] }, only: [:create]
 
-      before_action :ajax_requests_required,  only: [:create]
-      before_action :cookies_required,        only: [:create]
+        before_action :ajax_requests_required,  only: [:create]
+        before_action :cookies_required,        only: [:create]
 
-      before_action :empty_trap_required,     only: [:create], if: -> { TheComments.config.empty_trap_protection }
-      before_action :tolerance_time_required, only: [:create], if: -> { TheComments.config.tolerance_time_protection }
+        before_action :empty_trap_required,     only: [:create], if: -> { TheComments.config.empty_trap_protection }
+        before_action :tolerance_time_required, only: [:create], if: -> { TheComments.config.tolerance_time_protection }
 
-      # preparation
-      before_action :define_commentable, only: [:create]
+        # preparation
+        before_action :define_commentable, only: [:create]
 
-      # raise an errors
-      before_action -> { return render(json: { errors: @errors }) unless @errors.blank? }, only: [:create]
+        # raise an errors
+        before_action -> { return render(json: { errors: @errors }) unless @errors.blank? }, only: [:create]
+      end
+
     end
 
     # App side methods (you can overwrite them)

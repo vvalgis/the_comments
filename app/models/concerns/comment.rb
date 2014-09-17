@@ -1,34 +1,37 @@
 module TheComments
   module Comment
-    extend ActiveSupport::Concern
+    # extend ActiveSupport::Concern
 
-    included do
-      scope :active, -> { with_state [:draft, :published] }
-      scope :with_users, -> { includes(:user) }
+    def self.included(base)
+      # included do
+      base.class_eval do
+        scope :active, -> { with_state [:draft, :published] }
+        scope :with_users, -> { includes(:user) }
 
-      # Nested Set
-      acts_as_nested_set scope: [:commentable_type, :commentable_id]
+        # Nested Set
+        acts_as_nested_set scope: [:commentable_type, :commentable_id]
 
-      # simple sort scopes
-      include ::TheSimpleSort::Base
+        # simple sort scopes
+        include ::TheSimpleSort::Base
 
-      # TheSortableTree
-      include ::TheSortableTree::Scopes
+        # TheSortableTree
+        include ::TheSortableTree::Scopes
 
-      # Comments State Machine
-      include TheComments::CommentStates
+        # Comments State Machine
+        include TheComments::CommentStates
 
-      validates :raw_content, presence: true
+        validates :raw_content, presence: true
 
-      # relations
-      belongs_to :user
-      belongs_to :holder, class_name: :User
-      belongs_to :commentable, polymorphic: true
+        # relations
+        belongs_to :user
+        belongs_to :holder, class_name: :User
+        belongs_to :commentable, polymorphic: true
 
-      # callbacks
-      before_create :define_holder, :define_default_state, :define_anchor, :denormalize_commentable
-      after_create  :update_cache_counters
-      before_save   :prepare_content
+        # callbacks
+        before_create :define_holder, :define_default_state, :define_anchor, :denormalize_commentable
+        after_create  :update_cache_counters
+        before_save   :prepare_content
+      end
     end
 
     def header_title

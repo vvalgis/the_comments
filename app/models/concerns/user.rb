@@ -2,8 +2,11 @@ module TheComments
   module User
     extend ActiveSupport::Concern
 
-    included do
-      has_many :comcoms, class_name: :Comment, foreign_key: :holder_id
+    def self.included(base)
+      # included do
+      base.class_eval do
+        has_many :comcoms, class_name: :Comment, foreign_key: :holder_id
+      end
     end
 
     def my_comments; ::Comment.where(user: self); end

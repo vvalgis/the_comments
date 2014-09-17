@@ -2,13 +2,16 @@ module TheComments
   module Commentable
 
     extend ActiveSupport::Concern
-    
-    included do
-      has_many :comments, as: :commentable
 
-      # *define_denormalize_flags* - should be placed before title or url builder filters
-      before_validation :define_denormalize_flags
-      after_save        :denormalize_for_comments, if: -> { !id_changed? }
+    def self.included(base)
+      # included do
+      base.class_eval do
+        has_many :comments, as: :commentable
+
+        # *define_denormalize_flags* - should be placed before title or url builder filters
+        before_validation :define_denormalize_flags
+        after_save        :denormalize_for_comments, if: -> { !id_changed? }
+      end
     end
 
     # Default Denormalization methods
@@ -63,7 +66,7 @@ module TheComments
           commentable_state: commentable_state,
           commentable_url:   commentable_url
         })
-      end 
+      end
     end
   end
 end
